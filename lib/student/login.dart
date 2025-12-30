@@ -1,18 +1,20 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:labtrack/lab%20assistant/assistanthome.dart';
 import 'package:labtrack/student/homepage.dart';
 import 'package:labtrack/student/studentreg.dart';
 
 Dio dio = Dio();
 String baseurl = 'http://192.168.1.150:8000';
 int? loginid;
+String? usertype;
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
   final TextEditingController name = TextEditingController();
   final TextEditingController password = TextEditingController();
-  final GlobalKey<FormState> key = GlobalKey<FormState>();
+  final formkey = GlobalKey<FormState>();
 
   // 🎓 College Theme Colors
   static const Color primaryColor = Color(0xFF1E3A8A);
@@ -28,12 +30,25 @@ class LoginPage extends StatelessWidget {
 
     try {
       final response = await dio.post('$baseurl/login', data: data);
+      print(response.data);
       if (response.statusCode == 200 || response.statusCode == 201) {
-         loginid = response.data['login_id'];
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Homepage(),)
-        );
+        loginid = response.data['login_id'];
+        usertype = response.data['Usertype'];
+        if (usertype == 'USER') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Homepage()),
+          );
+        } else if (usertype == 'labassistant') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => LabAssistantHomePage()),
+          );
+        } else {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Invalid user')));
+        }
       }
     } catch (e) {
       print(e);
@@ -62,7 +77,7 @@ class LoginPage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(22),
               child: Form(
-                key: key,
+                key: formkey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -151,15 +166,9 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          if (key.currentState!.validate()) {
+                          if (formkey.currentState!.validate()) {
                             // Navigate to dashboard/home
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Homepage(),
-                              ),
-                              (route) => false,
-                            );
+                            _login(context);
                           }
                         },
                         child: const Text(

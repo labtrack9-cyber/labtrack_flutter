@@ -18,7 +18,7 @@ class studentpage extends StatelessWidget {
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
 
-  final GlobalKey<FormState> key = GlobalKey<FormState>();
+  final GlobalKey<FormState> _key = GlobalKey<FormState>();
 
   // 🎓 Same theme colors as Login
   static const Color primaryColor = Color(0xFF1E3A8A);
@@ -29,20 +29,22 @@ class studentpage extends StatelessWidget {
   Future<void>_register(context) async{
    Map<String, dynamic>data = {
     'name':name.text,
-    'admission':admission.text,
+    'admissionno':admission.text,
     'program':program.text,
     'semester':semester.text,
-    'mob':mob.text,
+    'mobno':mob.text,
     'dob':dob.text,
     'gender':gender.text,
     'email':email.text,
     'password':password.text,
+    'username':email.text
+  
    };
    print(data);
    try {
      final response = await dio.post('$baseurl/userreg',data: data);
      if (response.statusCode==200||response.statusCode==201){
-      Navigator.pop(context);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage(),));
      }
    } catch (e) {
      print(e);
@@ -71,7 +73,7 @@ class studentpage extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(22),
               child: Form(
-                key: key,
+                key: _key,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -112,7 +114,7 @@ class studentpage extends StatelessWidget {
                           ),
                         ),
                         onPressed: () {
-                          if (key.currentState!.validate()) {
+                          if (_key.currentState!.validate()) {
                            _register(context);
                           }
                         },
