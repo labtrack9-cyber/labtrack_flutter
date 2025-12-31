@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:labtrack/student/login.dart';
+import 'package:intl/intl.dart'; // <-- for date formatting
 
 // 🎓 Theme colors
 const Color primaryColor = Color(0xFF1E3A8A);
@@ -13,15 +15,39 @@ class Viewtask extends StatefulWidget {
 }
 
 class _ViewtaskState extends State<Viewtask> {
-  List<Map<String, dynamic>> tasks = [
-    {"title": "Math Assignment", "completed": true, "remark": "Excellent work"},
-    {"title": "Science Project", "completed": false, "remark": ""},
-    {"title": "English Essay", "completed": true, "remark": "Good, improve grammar"},
-  ];
+  List<Map<String, dynamic>> tasks = [];
 
-  int get completedCount => tasks.where((t) => t["completed"] == true).length;
+  Future<void> gettasks(BuildContext context) async {
+    try {
+      final response = await dio.get('$baseurl/task/$loginid');
+      print(response.data);
 
-  double get progress => tasks.isEmpty ? 0 : completedCount / tasks.length;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          tasks = List<Map<String, dynamic>>.from(response.data);
+        });
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  /// Format date string to dd MMM yyyy
+  String formatDate(String? date) {
+    if (date == null || date.isEmpty) return 'No due date';
+    try {
+      final dt = DateTime.parse(date);
+      return DateFormat('dd MMM yyyy').format(dt);
+    } catch (e) {
+      return 'Invalid date';
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    gettasks(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,71 +61,17 @@ class _ViewtaskState extends State<Viewtask> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // 🔹 Progress Card
-            Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Overall Progress",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              minHeight: 12,
-                              backgroundColor: Colors.grey.shade300,
-                              color: primaryColor,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Text(
-                          "${(progress * 100).toInt()}%",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "$completedCount of ${tasks.length} tasks completed",
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                      ),
-                    ),
-                  ],
+        child: tasks.isEmpty
+            ? Center(
+                child: Text(
+                  "No tasks assigned yet",
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // 🔹 Task List
-            Expanded(
-              child: ListView.builder(
+              )
+            : ListView.builder(
                 itemCount: tasks.length,
                 itemBuilder: (context, index) {
                   final task = tasks[index];
-                  final bool completed = task["completed"];
 
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
@@ -112,49 +84,41 @@ class _ViewtaskState extends State<Viewtask> {
                         horizontal: 16,
                         vertical: 12,
                       ),
-                      leading: CircleAvatar(
-                        radius: 24,
-                        backgroundColor: completed
-                            ? primaryColor.withOpacity(0.15)
-                            : Colors.orange.withOpacity(0.15),
-                        child: Icon(
-                          completed ? Icons.check : Icons.pending_actions,
-                          color: completed ? primaryColor : Colors.orange,
-                        ),
-                      ),
+                      leading: const Icon(Icons.science, color: primaryColor),
                       title: Text(
-                        task["title"],
+                        task["experiment"] ?? 'No experiment name',
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
                           color: textColor,
                         ),
                       ),
-                      subtitle: completed
-                          ? Padding(
-                              padding: const EdgeInsets.only(top: 6),
-                              child: Text(
-                                "Remark: ${task["remark"]}",
-                                style: TextStyle(
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                            )
-                          : const Padding(
-                              padding: EdgeInsets.only(top: 6),
-                              child: Text(
-                                "Pending",
-                                style: TextStyle(
-                                  color: Colors.redAccent,
-                                ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Status: ${task["status"] ?? 'Pending'}",
+                              style: TextStyle(
+                                color: task["status"] != null
+                                    ? Colors.green
+                                    : Colors.redAccent,
                               ),
                             ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Due Date: ${formatDate(task["duedate"])}",
+                              style: TextStyle(
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 },
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

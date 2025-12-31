@@ -1,19 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:labtrack/student/login.dart';
+import 'package:intl/intl.dart';
 
 // 🎓 Theme colors
 const Color primaryColor = Color(0xFF1E3A8A);
 const Color backgroundColor = Color(0xFFF8FAFC);
 const Color textColor = Color(0xFF111827);
 
-class AssignedLabPage extends StatelessWidget {
-  AssignedLabPage({super.key});
+class AssignedLabPage extends StatefulWidget {
+  const AssignedLabPage({super.key});
 
-  // Sample assigned lab data
-  final List<Map<String, String>> labs = [
-    {"labName": "Physics Lab", "labInstructor": "Dr. John Doe", "schedule": "Mon 10:00-12:00"},
-    {"labName": "Chemistry Lab", "labInstructor": "Dr. Jane Smith", "schedule": "Wed 14:00-16:00"},
-    {"labName": "Computer Lab", "labInstructor": "Mr. Alan Turing", "schedule": "Fri 09:00-11:00"},
-  ];
+  @override
+  State<AssignedLabPage> createState() => _AssignedLabPageState();
+}
+
+class _AssignedLabPageState extends State<AssignedLabPage> {
+  List<dynamic> labs = [];
+
+  /// 🔹 Fetch assigned labs
+  Future<void> getlabs(BuildContext context) async {
+    try {
+      final response = await dio.get('$baseurl/assignedlab/$loginid');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        setState(() {
+          labs = response.data;
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Something went wrong')),
+      );
+    }
+  }
+
+  /// 🔹 Format API DateTime
+  String formatDateTime(String? apiTime) {
+    if (apiTime == null || apiTime.isEmpty) {
+      return 'Not scheduled';
+    }
+
+    try {
+      final dateTime = DateTime.parse(apiTime).toLocal();
+      return DateFormat('dd MMM yyyy, hh:mm a').format(dateTime);
+    } catch (e) {
+      return 'Invalid date';
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getlabs(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +70,17 @@ class AssignedLabPage extends StatelessWidget {
             ? Center(
                 child: Text(
                   "No labs assigned yet",
-                  style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey.shade600,
+                  ),
                 ),
               )
             : ListView.builder(
                 itemCount: labs.length,
                 itemBuilder: (context, index) {
                   final lab = labs[index];
+
                   return Card(
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(
@@ -49,33 +92,51 @@ class AssignedLabPage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          /// 🔹 Lab Name
                           Text(
-                            lab["labName"]!,
+                            lab["lab_name"] ?? 'Unknown Lab',
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: textColor,
                             ),
                           ),
-                          const SizedBox(height: 8),
+
+                          const SizedBox(height: 10),
+
+                          /// 🔹 Lab Assistant
                           Row(
                             children: [
-                              const Icon(Icons.person_outline, size: 18, color: primaryColor),
+                              const Icon(
+                                Icons.person_outline,
+                                size: 18,
+                                color: primaryColor,
+                              ),
                               const SizedBox(width: 6),
                               Text(
-                                lab["labInstructor"]!,
-                                style: const TextStyle(color: textColor),
+                                lab["labassistant_name"] ??
+                                    'Assistant not assigned',
+                                style:
+                                    const TextStyle(color: textColor),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+
+                          const SizedBox(height: 6),
+
+                          /// 🔹 Time
                           Row(
                             children: [
-                              const Icon(Icons.schedule, size: 18, color: primaryColor),
+                              const Icon(
+                                Icons.schedule,
+                                size: 18,
+                                color: primaryColor,
+                              ),
                               const SizedBox(width: 6),
                               Text(
-                                lab["schedule"]!,
-                                style: const TextStyle(color: textColor),
+                                formatDateTime(lab["time"]),
+                                style:
+                                    const TextStyle(color: textColor),
                               ),
                             ],
                           ),

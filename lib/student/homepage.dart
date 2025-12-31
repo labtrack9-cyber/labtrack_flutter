@@ -4,8 +4,35 @@ import 'package:labtrack/student/feedback.dart';
 import 'package:labtrack/student/report.dart';
 import 'package:labtrack/student/viewassignedlab.dart';
 import 'package:labtrack/student/viewtask.dart';
-import 'package:labtrack/student/profile.dart';
 
+// ================= COLORS =================
+const Color primaryColor = Color(0xFF1E3A8A);
+const Color backgroundColor = Color(0xFFF8FAFC);
+const Color textColor = Color(0xFF111827);
+
+// ================= MAIN =================
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'LabTrack',
+      theme: ThemeData(
+        scaffoldBackgroundColor: backgroundColor,
+        primaryColor: primaryColor,
+      ),
+      home: const Homepage(),
+    );
+  }
+}
+
+// ================= HOMEPAGE =================
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
 
@@ -13,42 +40,30 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
-const Color primaryColor = Color(0xFF1E3A8A);
-const Color backgroundColor = Color(0xFFF8FAFC);
-const Color textColor = Color(0xFF111827);
-
 class _HomepageState extends State<Homepage> {
   int _currentIndex = 0;
 
-  // 🔹 Screens for bottom nav
-  final List<Widget> _screens = [
-    const HomeScreen(),    // Custom Home Screen (features grid)
-    Profile()      // Profile screen
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
-      body: _screens[_currentIndex],  // Switch screens based on selected tab
+      body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         selectedItemColor: primaryColor,
         unselectedItemColor: Colors.grey,
         onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          setState(() => _currentIndex = index);
         },
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: "Home",
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.task),
-          //   label: "Tasks",
-          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: "Profile",
@@ -59,138 +74,194 @@ class _HomepageState extends State<Homepage> {
   }
 }
 
-// 🔹 Home Screen with Feature Grid
+// ================= HOME SCREEN =================
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // 👤 Profile Card
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // PROFILE CARD
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 8)
+                ],
+              ),
               child: Row(
-                children: const [
+                children: [
                   CircleAvatar(
-                    radius: 32,
+                    radius: 35,
                     backgroundColor: primaryColor,
-                    child: Icon(Icons.person, color: Colors.white, size: 32),
+                    child: const Icon(Icons.person,
+                        color: Colors.white, size: 36),
                   ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Hello, Student!",
-                          style: TextStyle(
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Hello, Student 👋",
+                        style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: textColor,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          "Admission No: 123456",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                            fontWeight: FontWeight.bold,
+                            color: textColor),
+                      ),
+                      SizedBox(height: 6),
+                      Text("Admission No: 123456",
+                          style: TextStyle(color: Colors.grey)),
+                    ],
+                  )
                 ],
               ),
             ),
-          ),
 
-          const SizedBox(height: 24),
+            const SizedBox(height: 30),
 
-          // 🔹 Features Grid
-          GridView.count(
-            crossAxisCount: 3,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              _featureItem(context, Icons.report, "View Report"),
-              _featureItem(context, Icons.task, "View Tasks"),
-              _featureItem(context, Icons.room_preferences, "Assigned Lab"),
-              _featureItem(context, Icons.feedback, "Feedback"),
-              _featureItem(context, Icons.warning_amber_rounded, "Complaints"),
-              _featureItem(context, Icons.reply, "View Reply"),
-            ],
-          ),
-        ],
+            const Text(
+              "Quick Actions",
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: textColor),
+            ),
+
+            const SizedBox(height: 16),
+
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate:
+                  const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: features.length,
+              itemBuilder: (context, index) {
+                return FeatureCard(feature: features[index]);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-// 🔹 Feature Item Widget
-Widget _featureItem(BuildContext context, IconData icon, String label) {
-  return Card(
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(16),
-    ),
-    elevation: 2,
-    child: InkWell(
+// ================= FEATURE MODEL =================
+class Feature {
+  final IconData icon;
+  final String title;
+  final Widget page;
+
+  Feature({required this.icon, required this.title, required this.page});
+}
+
+final List<Feature> features = [
+  Feature(icon: Icons.report, title: "View Report", page: ViewReportPage()),
+  Feature(icon: Icons.task, title: "View Tasks", page: Viewtask()),
+  Feature(
+      icon: Icons.room_preferences,
+      title: "Assigned Lab",
+      page: AssignedLabPage()),
+  Feature(icon: Icons.feedback, title: "Feedback", page: FeedbackPage()),
+  Feature(
+      icon: Icons.warning_amber_rounded,
+      title: "Complaints",
+      page: ComplaintPage()),
+  // Feature(icon: Icons.reply, title: "View Reply", page: repl()),
+];
+
+// ================= FEATURE CARD =================
+class FeatureCard extends StatelessWidget {
+  final Feature feature;
+
+  const FeatureCard({super.key, required this.feature});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(18),
       onTap: () {
-        switch (label) {
-          case "View Report":
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const ViewReportPage()));
-            break;
-          case "View Tasks":
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => const Viewtask()));
-            break;
-          case "Assigned Lab":
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) =>  AssignedLabPage()));
-            break;
-          case "Feedback":
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => FeedbackPage()));
-            break;
-          case "Complaints":
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ComplaintPage()));
-            break;
-          case "View Reply":
-            // TODO: Implement view reply
-            break;
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => feature.page),
+        );
       },
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 6)
+          ],
+        ),
+        padding: const EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircleAvatar(
-              radius: 24,
-              child: Icon(icon, color: primaryColor, size: 28),
+              backgroundColor: primaryColor.withOpacity(0.1),
+              child: Icon(feature.icon, color: primaryColor),
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: textColor),
-            ),
+            const SizedBox(height: 10),
+            Text(feature.title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 13, color: textColor)),
           ],
         ),
       ),
-    ),
-  );
+    );
+  }
+}
+
+// ================= COMMON PAGE UI =================
+class CommonPage extends StatelessWidget {
+  final String title;
+
+  const CommonPage({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: primaryColor,
+      ),
+      body: Center(
+        child: Text(
+          title,
+          style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: textColor),
+        ),
+      ),
+    );
+  }
+}
+
+// ================= PROFILE SCREEN =================
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text("Profile Screen",
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor)),
+    );
+  }
 }

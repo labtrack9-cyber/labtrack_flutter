@@ -5,13 +5,39 @@ import 'package:labtrack/student/login.dart';
 class FeedbackPage extends StatelessWidget {
   FeedbackPage({super.key});
 
-  final TextEditingController complaint = TextEditingController();
+  final TextEditingController feedback = TextEditingController();
   final _key = GlobalKey<FormState>();
 
   // 🎓 Theme colors
   static const Color primaryColor = Color(0xFF1E3A8A);
   static const Color backgroundColor = Color(0xFFF8FAFC);
   static const Color textColor = Color(0xFF111827);
+
+Future<void> postfeedback(BuildContext context) async {
+    Map<String, dynamic> data = {'Feedback': feedback.text};
+
+    try {
+      final response = await dio.post(
+        '$baseurl/feedback/$loginid',
+        data: data,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('feeback submitted successfully')),
+        );
+        feedback.clear();
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Submission failed')));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Something went wrong')));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +94,7 @@ class FeedbackPage extends StatelessWidget {
 
                     // 🔹 Feedback Text Field
                     TextFormField(
-                      controller: complaint,
+                      controller: feedback,
                       maxLines: 8,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -105,11 +131,8 @@ class FeedbackPage extends StatelessWidget {
                         ),
                         onPressed: () {
                           if (_key.currentState!.validate()) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginPage()),
-                            );
+                            postfeedback(context);
+                           
                           }
                         },
                         child: const Text(
