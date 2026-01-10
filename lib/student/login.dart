@@ -5,7 +5,7 @@ import 'package:labtrack/student/homepage.dart';
 import 'package:labtrack/student/studentreg.dart';
 
 Dio dio = Dio();
-String baseurl = 'http://192.168.1.150:8000';
+String baseurl = 'http://192.168.1.116:5000';
 int? loginid;
 String? usertype;
 

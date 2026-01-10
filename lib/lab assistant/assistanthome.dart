@@ -3,6 +3,7 @@ import 'package:labtrack/lab assistant/assigntask.dart';
 import 'package:labtrack/lab assistant/labreport.dart';
 import 'package:labtrack/lab assistant/sendnotification.dart';
 import 'package:labtrack/lab assistant/viewstudents.dart';
+import 'package:labtrack/lab%20assistant/assignedlab.dart';
 import 'package:labtrack/lab%20assistant/classtask.dart';
 import 'package:labtrack/lab%20assistant/labassistantprofile.dart';
 import 'package:labtrack/student/login.dart';
@@ -116,6 +117,21 @@ class _LabAssistantHomePageState extends State<LabAssistantHomePage> {
                       );
                     },
                   ),
+
+ _menuCard(
+                    icon: Icons.computer,
+                    title: "View Assigned Lab",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ViewAssignedLabPage(),
+                        ),
+                      );
+                    },
+                  ),
+
+
                   _menuCard(
                     icon: Icons.notifications_active,
                     title: "Send Notification",

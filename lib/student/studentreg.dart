@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:labtrack/student/login.dart';
 
-String baseurl='http://192.168.1.150:8000';
 Dio dio=Dio();
 
 class studentpage extends StatelessWidget {
@@ -10,6 +9,8 @@ class studentpage extends StatelessWidget {
 
   final TextEditingController name = TextEditingController();
   final TextEditingController admission = TextEditingController();
+  // ignore: non_constant_identifier_names
+  final TextEditingController Class = TextEditingController();
   final TextEditingController program = TextEditingController();
   final TextEditingController semester = TextEditingController();
   final TextEditingController mob = TextEditingController();
@@ -30,6 +31,7 @@ class studentpage extends StatelessWidget {
    Map<String, dynamic>data = {
     'name':name.text,
     'admissionno':admission.text,
+    'Class':Class.text,
     'program':program.text,
     'semester':semester.text,
     'mobno':mob.text,
@@ -91,6 +93,7 @@ class studentpage extends StatelessWidget {
 
                     _buildField(name, "Name", Icons.person),
                     _buildField(admission, "Admission No", Icons.badge),
+                     _buildField(Class, "Class", Icons.badge),
                     _buildField(program, "Program", Icons.school),
                     _buildField(semester, "Semester", Icons.calendar_today),
                     _buildField(mob, "Mobile Number", Icons.phone),
